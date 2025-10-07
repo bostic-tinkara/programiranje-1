@@ -5,7 +5,7 @@
 (*----------------------------------------------------------------------------*
  ## Vektorji
 [*----------------------------------------------------------------------------*)
-
+let funkcija x = 2*x
 (*----------------------------------------------------------------------------*
  Napišite funkcijo `razteg : float -> float list -> float list`, ki vektor,
  predstavljen s seznamom števil s plavajočo vejico, pomnoži z danim skalarjem.
@@ -49,7 +49,7 @@ let zmnozi vektor1 vektor2 = List.map2 ( *. ) vektor1 vektor2
 
 let skalarni_produkt v1 v2 =
   let seznam = zmnozi v1 v2 in
-  List.map vsota_seznama seznam
+  vsota_seznama seznam
 
 let primer_vektorji_3 = skalarni_produkt [1.0; 2.0; 3.0] [4.0; 5.0; 6.0]
 (* val primer_vektorji_3 : float = 32. *)
@@ -60,7 +60,7 @@ let primer_vektorji_3 = skalarni_produkt [1.0; 2.0; 3.0] [4.0; 5.0; 6.0]
 [*----------------------------------------------------------------------------*)
 
 let norma vektor =
-  sqrt skalarni_produkt vektor vektor
+  sqrt (skalarni_produkt vektor vektor)
 
 let primer_vektorji_4 = norma [3.0; 4.0]
 (* val primer_vektorji_4 : float = 5. *)
@@ -71,7 +71,7 @@ let primer_vektorji_4 = norma [3.0; 4.0]
 [*----------------------------------------------------------------------------*)
 
 let vmesni_kot v1 v2 =
-  acos ((skalarni_produkt v1 v2) /. (norma v1) /. (norma v2))
+  acos ((skalarni_produkt v1 v2) /. ((norma v1) *. (norma v2)))
 
 let primer_vektorji_5 = vmesni_kot [1.0; 0.0] [0.0; 1.0]
 (* val primer_vektorji_5 : float = 1.57079632679489656 *)
@@ -81,8 +81,8 @@ let primer_vektorji_5 = vmesni_kot [1.0; 0.0] [0.0; 1.0]
  vektor.
 [*----------------------------------------------------------------------------*)
 
-let normirani v =
-  
+let normirani v = 
+  List.map (fun x -> x /. norma v) v
 
 let primer_vektorji_6 = normirani [3.0; 4.0]
 (* val primer_vektorji_6 : float list = [0.600000000000000089; 0.8] *)
@@ -92,7 +92,9 @@ let primer_vektorji_6 = normirani [3.0; 4.0]
  izračuna projekcijo prvega vektorja na drugega.
 [*----------------------------------------------------------------------------*)
 
-let projekcija _ _ = ()
+let projekcija v1 v2 =
+  let proj = skalarni_produkt v1 v2 /. skalarni_produkt v2 v2 in
+  List.map (fun x -> x *. proj) v2
 
 let primer_vektorji_7 = projekcija [3.0; 4.0] [1.0; 0.0]
 (* val primer_vektorji_7 : float list = [3.; 0.] *)
