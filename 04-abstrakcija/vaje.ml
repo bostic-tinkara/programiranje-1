@@ -20,9 +20,17 @@ module type NAT = sig
 
   val eq  : t -> t -> bool
   val zero : t
-  (* Dodajte manjkajoče! *)
-  (* val to_int : t -> int *)
-  (* val of_int : int -> t *)
+  val one : t
+
+  val ( + ) : t -> t -> t
+  val ( - ) : t -> t -> t
+  val ( * ) : t -> t -> t
+ (* !!!!! alt puscica gor/dol -> gre vrstica gor/ dol
+ alt + shift + puscica gor/dol -> se podvoji zgoraj/spodaj
+ f2 preimenujes lokalno spremenljivko!!!!!!*)
+
+  val to_int : t -> int
+  val of_int : int -> t
 end
 
 (*----------------------------------------------------------------------------*
@@ -36,11 +44,23 @@ end
 module Nat_int : NAT = struct
 
   type t = int
-  let eq x y = failwith "later"
+
+  let eq x y = (x = y) (*t je ze int, lahko delas kot z int*)
   let zero = 0
-  (* Dodajte manjkajoče! *)
+  let one = 1
+
+  let ( + ) m n = m + n (*prvi + dela na t, drugi na int*)
+  let ( - ) m n = if m > n then m - n else zero
+  let ( * ) m n = m * n
+
+  let to_int n = n
+  let of_int x = x
 
 end
+let pet = Nat_int.of_int 5
+let deset = Nat_int.of_int 10
+let petnajst = Nat_int.( + ) pet deset
+  (*zunaj modula en plus ne dela, kot zelimo, le znotraj*)
 
 (*----------------------------------------------------------------------------*
  Napišite implementacijo `NAT`, ki temelji na [Peanovih
@@ -51,12 +71,46 @@ end
  rekurzijo na `k` in `l`, kjer je osnoven primer `Zero = Zero`.
 [*----------------------------------------------------------------------------*)
 
-module Nat_peano : NAT = struct
+module Nat_peano : NAT = struct (*ce izbrises : NAT OCamla ne bo motil sig*)
 
-  type t = unit (* To morate spremeniti! *)
-  let eq x y = failwith "later"
-  let zero = () (* To morate spremeniti! *)
-  (* Dodajte manjkajoče! *)
+  type t =
+    | Nic
+    | Nasl of t 
+(*let nicla = Nica
+let dve = Nasl(Nasl Nic)*)
+
+  let rec eq x y =
+    match (x, y) with (*vedno pri nastevnih tipih*)
+    | Nic, Nic -> true
+    | Nasl x', Nasl y' -> eq x' y'
+    | _ -> false
+
+  let zero = Nic
+  let one = Nasl Nic
+
+  let rec ( + ) x y =
+    match x with
+    | Nic -> y
+    | Nasl x' -> Nasl (x' + y)
+
+  let rec ( - ) x y =
+    match (x, y) with
+    | Nasl x', Nic -> x
+    | Nic, _ -> Nic
+    | Nasl x', Nasl y' -> x' - y' (*Boljse od Nasl (x' - y)*)
+
+  let rec ( * ) x y =
+    match x with
+    | Nic -> Nic
+    | Nasl x' -> (x' * y) + y
+  let rec to_int n =
+    match n with
+    | Nic -> 0
+    | Nasl n' -> Int.add 1 (to_int n') (*ali to_int (n' + Nasl Nic) ?*)
+  let rec of_int n =
+    match n with
+    | 0 -> Nic
+    | n' -> Nasl (of_int (Int.sub n' 1))
 
 end
 
@@ -82,10 +136,17 @@ module type CALC = sig
 end
 
 module Nat_calculations (N: NAT) : CALC with type t := N.t = struct
-  let factorial _ = (* To morate spremeniti! *)
-    N.zero
+  let rec factorial n =
+    if N.eq n N.zero then N.one
+    else N.( * ) 
+          n 
+          (factorial (
+            N.(-) 
+              n 
+              N.one
+          ))
 
-  let sum_100 = (* To morate spremeniti! *)
+  let sum_100 =
     N.zero
 end
 
@@ -100,6 +161,10 @@ end
 module Nat_int_calc = Nat_calculations (Nat_int)
 module Nat_peano_calc = Nat_calculations (Nat_peano)
 
+let fact_5_int =
+  Nat_int_calc.factorial (Nat_int.of_int 5) |> Nat_int.to_int
+let fact_5_peano =
+  Nat_peano_calc.factorial (Nat_peano.of_int 5) |> Nat_peano.to_int
 
 (* val sum_100_int : int = 5050 *)
 (* val sum_100_peano : int = 5050 *)
@@ -116,7 +181,7 @@ module Nat_peano_calc = Nat_calculations (Nat_peano)
  Pretvorjanje iz in v `int` pa definirajte poljubno.
 [*----------------------------------------------------------------------------*)
 
-module Nat_pair (A: NAT) (B: NAT) : NAT = struct
+(* module Nat_pair (A: NAT) (B: NAT) : NAT = struct
   type t = A.t * B.t
 
   let eq x y = failwith "later"
@@ -124,7 +189,7 @@ module Nat_pair (A: NAT) (B: NAT) : NAT = struct
   (* Dodajte manjkajoče! *)
 end
 
-module Nat_pair_int_peano = Nat_pair (Nat_int) (Nat_peano)
+module Nat_pair_int_peano = Nat_pair (Nat_int) (Nat_peano) *)
 (* Poskusite narediti nekaj testnih računov. *)
 
 (*----------------------------------------------------------------------------*
