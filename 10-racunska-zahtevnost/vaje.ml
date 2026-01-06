@@ -18,13 +18,28 @@ Natančno definirajte pogoje, da funkcija `f` uredi seznam.
  - : int list = [7]
 [*----------------------------------------------------------------------------*)
 
+let rec insert y xs =
+  match xs with
+  | [] -> [y]
+  | x :: xs' -> if y < x then y :: xs else x :: insert y xs'
+
+
+(*najslabsi primer y vecji od vseh elementov, gres cez vse,
+O(n)*)
 
 (*----------------------------------------------------------------------------*]
  Prazen seznam je že urejen. Funkcija [insert_sort] uredi seznam tako da
  zaporedoma vstavlja vse elemente seznama v prazen seznam.
 [*----------------------------------------------------------------------------*)
 
+let rec insert_sort xs =
+    match xs with
+    | [] -> []
+    | x :: xs' -> 
+    let rest = insert_sort xs' in (*T(n-1)*)
+    insert x rest (*O(n)*)
 
+(*T(n) = T(n-1) + O(n) = O(n^2)*)
 
 (*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*]
  Urejanje z Izbiranjem
@@ -72,6 +87,14 @@ Natančno definirajte pogoje, da funkcija `f` uredi seznam.
  - : int array = [|0; 4; 2; 3; 1|]
 [*----------------------------------------------------------------------------*)
 
+let swap a i j =
+  let prvi = a.(i) in
+  a.(i) <- a.(j);
+  a.(j) <- prvi
+
+(* let t = a.(i) in
+a.(i)<-a.(j);
+a.(j)<- t*)
 
 (*----------------------------------------------------------------------------*]
  Funkcija [index_min a lower upper] poišče indeks najmanjšega elementa tabele
@@ -79,12 +102,33 @@ Natančno definirajte pogoje, da funkcija `f` uredi seznam.
  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  index_min [|0; 2; 9; 3; 6|] 2 4 = 3
 [*----------------------------------------------------------------------------*)
+let index_min a lower upper =
+  let ind_min = ref lower in
+  for i = lower to upper do
+    if a.(i) < a.(!ind_min) then
+      ind_min := i (*ekviv Ref.set ind_min i, ref kot array dolzine 1, ref je 'skatla',
+      z ! dobis vrednost notri*)
+    else 
+      ()
+  done;
+  !ind_min
 
 
 (*----------------------------------------------------------------------------*]
  Funkcija [selection_sort_array] implementira urejanje z izbiranjem na mestu. 
 [*----------------------------------------------------------------------------*)
 
+let selection_sort_array a =
+  for pointer = 0 to Array.length a - 1 do (*OCaml gre do vkljucno zadnjega indeksa*)
+    let min_i = index_min a pointer (Array.length a - 1) in
+    swap a min_i pointer
+  done
+
+  (*nic ne vrnemo, ker nekaj spremenili, ne naredili novega*)
+  (*oz. done;
+  () lahko brez tega, ker for ze sam to naredi*)
+  (*casovna zahtevnost: for: n, min_i: n-1, n-2,..., swap: O(1), skupaj torej O(n^2)*)
+  (*in place -> nic dodatnega spomina porabili*)
 
 (*----------------------------------------------------------------------------*]
  Funkcija [min_and_rest list] vrne par [Some (z, list')] tako da je [z]

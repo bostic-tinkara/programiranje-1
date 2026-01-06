@@ -51,11 +51,6 @@ RUN /home/opam/.opam/4.14/bin/ocaml-jupyter-opam-genspec
 # Install the OCaml Jupyter kernel for the current user in Jupyter, using the generated specification
 RUN jupyter kernelspec install --name ocaml-jupyter "$(opam var share)/jupyter" --user
 
-# Install elan (Lean version manager)
-RUN curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf \
-    | sh -s -- --default-toolchain leanprover/lean4:stable -y
-ENV PATH="/home/opam/.elan/bin:${PATH}"
-
 # We remove the dummy .gitconfig file, included in the OCaml Docker image, allowing VS Code to replace it
 # with the much more useful local version.
 RUN rm /home/opam/.gitconfig
